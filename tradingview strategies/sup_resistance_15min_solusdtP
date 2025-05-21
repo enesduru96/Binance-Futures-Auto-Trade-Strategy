@@ -1,0 +1,70 @@
+//@version=4
+strategy(title="Support and Resistance Levels with Breaks Strategy [LuxAlgo]", shorttitle="S&R Strategy [LuxAlgo]", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=10)
+
+// Input Variables
+toggleBreaks = input(true, title="Show Breaks")
+leftBars = input(15, title="Left Bars")
+rightBars = input(15, title="Right Bars")
+volumeThresh = input(20, title="Volume Threshold")
+
+// Calculate Pivots
+highUsePivot = fixnan(pivothigh(leftBars, rightBars)[1])
+lowUsePivot = fixnan(pivotlow(leftBars, rightBars)[1])
+
+// Plot Resistance and Support Levels
+plot(highUsePivot, color=change(highUsePivot) ? na : #FF0000, linewidth=3, offset=-(rightBars + 1), title="Resistance")
+plot(lowUsePivot, color=change(lowUsePivot) ? na : #233dee, linewidth=3, offset=-(rightBars + 1), title="Support")
+
+// Volume Oscillator Calculation
+short = ema(volume, 5)
+long = ema(volume, 10)
+osc = 100 * (short - long) / long
+
+// Break Signals
+breakSupport = toggleBreaks and crossunder(close, lowUsePivot) and not (open - close < high - open) and osc > volumeThresh
+breakResistance = toggleBreaks and crossover(close, highUsePivot) and not (open - low > close - open) and osc > volumeThresh
+
+// Wick Signals
+bullWick = toggleBreaks and crossover(close, highUsePivot) and open - low > close - open
+bearWick = toggleBreaks and crossunder(close, lowUsePivot) and open - close < high - open
+
+// Plot Signals
+plotshape(breakSupport, title="Break", text='B', style=shape.labeldown, location=location.abovebar, color=color.red, textcolor=color.white, transp=0, size=size.tiny)
+plotshape(breakResistance, title="Break", text='B', style=shape.labelup, location=location.belowbar, color=color.green, textcolor=color.white, transp=0, size=size.tiny)
+plotshape(bullWick, title="Break", text='Bull Wick', style=shape.labelup, location=location.belowbar, color=color.green, textcolor=color.white, transp=0, size=size.tiny)
+plotshape(bearWick, title="Break", text='Bear Wick', style=shape.labeldown, location=location.abovebar, color=color.red, textcolor=color.white, transp=0, size=size.tiny)
+
+// Alert Conditions
+alertcondition(breakSupport, title="Support Broken", message="Support Broken")
+alertcondition(breakResistance, title="Resistance Broken", message="Resistance Broken")
+
+bool no_position = strategy.position_size == 0
+bool long_position = strategy.position_size > 0
+bool short_position = strategy.position_size < 0
+
+// Strategy Logic
+if (breakSupport)
+    if long_position
+        strategy.close("Long")
+    if short_position == false
+        strategy.entry("Short", strategy.short)
+    
+if (breakResistance)
+    if short_position
+        strategy.close("Short", comment="Hey there")
+    if long_position == false
+        strategy.entry("Long", strategy.long)
+
+
+if short_position
+    entry_price = strategy.position_avg_price
+    take_profit_price = entry_price * 0.964
+    stop_price = entry_price * 1.05
+    strategy.exit('Exit Short LIMIT', 'Short', limit=take_profit_price)
+
+
+if long_position
+    entry_price = strategy.position_avg_price
+    take_profit_price = entry_price * 1.043
+    stop_price = entry_price * 0.94
+    strategy.exit('Exit Long LIMIT', 'Long', limit=take_profit_price)

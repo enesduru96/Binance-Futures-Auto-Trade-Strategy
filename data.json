@@ -1,0 +1,13 @@
+{
+	"current_margin" : 500,
+	"risk_percentage" : 30,
+	"symbol" : "SOLUSDT",
+	"last_checked_email_id" : 0,
+	"closed_trade_count" : 0,
+	"win_count" : 0,
+	"lose_count" : 0,
+	"total_profit" : 0,
+	"consecutive_losses" : 0,
+	"consecutive_losses_reference_price" : null,
+	"trading_status" : "continue"
+}
