@@ -8,9 +8,9 @@ Subscribes to binance websocket and on every candle tick:
 
 - Checks if there is a new email from tradingview (working similar to webhooks)
 - Email has conditions like:
->no signal -> conditions are not met, no position is taken
->BUY -> signals to open a long position (reverse if there is a short position)
->SELL -> signals to open a short position (reverse if there is a long position)
+>no signal -> conditions are not met, no position is taken <br>
+>BUY -> signals to open a long position (reverse if there is a short position) <br>
+>SELL -> signals to open a short position (reverse if there is a long position) <br>
 
 - Checks current position of the account
 
